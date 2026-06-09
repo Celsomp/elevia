@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Backgrounds */
+    --background: 42 60% 97%;       /* warm cream */
+    --foreground: 270 15% 10%;      /* near-black, warm tint */
+
+    /* Cards & Popovers */
+    --card: 40 50% 99%;
+    --card-foreground: 270 15% 10%;
+    --popover: 40 50% 99%;
+    --popover-foreground: 270 15% 10%;
+
+    /* Primary — sunflower yellow */
+    --primary: 43 80% 55%;
+    --primary-foreground: 270 15% 10%;
+
+    /* Secondary — warm orange */
+    --secondary: 28 85% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted */
+    --muted: 40 30% 92%;
+    --muted-foreground: 270 10% 45%;
+
+    /* Accent — natural green */
+    --accent: 100 35% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* UI chrome */
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 43 80% 55%;
+
+    /* Radius */
+    --radius: 1rem;
+
+    /* Elevia brand */
+    --sunflower: 43 80% 55%;        /* #E8B931 */
+    --sunflower-light: 48 90% 72%;
+    --sunflower-dark: 38 75% 42%;
+    --nature-green: 100 35% 45%;
+    --nature-cream: 42 60% 95%;
+    --nature-warm: 28 85% 55%;
+  }
+
+  .dark {
+    --background: 270 20% 8%;
+    --foreground: 42 40% 92%;
+
+    --card: 270 18% 11%;
+    --card-foreground: 42 40% 92%;
+    --popover: 270 18% 11%;
+    --popover-foreground: 42 40% 92%;
+
+    --primary: 43 80% 55%;
+    --primary-foreground: 270 15% 10%;
+
+    --secondary: 28 75% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 270 15% 16%;
+    --muted-foreground: 42 20% 60%;
+
+    --accent: 100 30% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 270 15% 18%;
+    --input: 270 15% 18%;
+    --ring: 43 80% 55%;
+
+    --sunflower: 43 80% 55%;
+    --sunflower-light: 48 90% 72%;
+    --sunflower-dark: 38 75% 42%;
+    --nature-green: 100 30% 40%;
+    --nature-cream: 270 18% 14%;
+    --nature-warm: 28 75% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  h1, h2, h3 {
+    @apply font-display;
+  }
+
+  #root {
+    @apply min-h-svh;
+  }
+}

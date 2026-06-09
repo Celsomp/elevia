@@ -1,0 +1,27 @@
+{
+  "name": "Elevia",
+  "short_name": "Elevia",
+  "description": "A tua jornada de crescimento pessoal",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDF3DC",
+  "theme_color": "#E8B931",
+  "categories": ["lifestyle", "health", "education"],
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
