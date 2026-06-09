@@ -13,6 +13,7 @@ const Focus           = lazy(() => import('@/pages/Focus'))
 const Reflections     = lazy(() => import('@/pages/Reflections'))
 const Helia           = lazy(() => import('@/pages/Helia'))
 const Premium         = lazy(() => import('@/pages/Premium'))
+const Goals           = lazy(() => import('@/pages/Goals'))
 const History         = lazy(() => import('@/pages/History'))
 const NotFound        = lazy(() => import('@/pages/NotFound'))
 
@@ -41,6 +42,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/home"        element={<Dashboard />} />
         <Route path="/focus"       element={<Focus />} />
+        <Route path="/goals"       element={<Goals />} />
         <Route path="/reflections" element={<Reflections />} />
         <Route path="/history"     element={<History />} />
         <Route path="/helia"       element={<Helia />} />
