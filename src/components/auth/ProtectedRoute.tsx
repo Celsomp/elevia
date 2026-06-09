@@ -3,11 +3,11 @@ import { useAuth } from '@/contexts/AuthContext'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  /** Redirect here if not authenticated. Default: /login */
+  /** Redirect here if not authenticated. Default: /auth */
   redirectTo?: string
 }
 
-export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, redirectTo = '/auth' }: ProtectedRouteProps) {
   const { session, loading } = useAuth()
 
   if (loading) {

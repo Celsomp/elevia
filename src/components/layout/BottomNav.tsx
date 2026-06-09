@@ -3,7 +3,7 @@ import { Sun, Timer, BookOpen, BarChart2, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { to: '/dashboard',    icon: Sun,          label: 'Início' },
+  { to: '/home',         icon: Sun,          label: 'Início' },
   { to: '/focus',        icon: Timer,        label: 'Foco' },
   { to: '/reflections',  icon: BookOpen,     label: 'Reflexões' },
   { to: '/history',      icon: BarChart2,    label: 'Histórico' },
