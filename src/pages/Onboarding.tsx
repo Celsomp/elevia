@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { LIFE_AREAS, getWeakestAreas, type ScoresMap } from '@/lib/lifeAreas'
+import { LifeWheelChart } from '@/components/radar/LifeWheelChart'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
@@ -461,65 +462,52 @@ function ResultsStep({ scores, weakest, onBack, onComplete, saving }: ResultsSte
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35 }}
     >
-      <div className="mb-6 text-center">
-        <div className="mb-2 text-5xl">✨</div>
+      <div className="mb-4 text-center">
         <h2 className="font-display text-2xl font-bold text-foreground">A tua Roda da Vida</h2>
-        <p className="mt-2 font-body text-sm text-muted-foreground">
-          A Elevia vai focar as tuas missões diárias nestas 3 áreas:
+        <p className="mt-1 font-body text-sm text-muted-foreground">
+          Vamos focar nas 3 áreas com mais espaço para crescer
         </p>
       </div>
 
-      <div className="mb-5 space-y-3">
+      {/* SVG Radar chart */}
+      <LifeWheelChart
+        scores={scores}
+        animated
+        className="w-full max-w-[260px] mx-auto mb-5"
+      />
+
+      {/* 3 weakest areas */}
+      <div className="mb-5 space-y-2.5">
         {weakest.map((area, i) => (
           <motion.div
             key={area.key}
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="flex items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm"
+            transition={{ delay: i * 0.1 + 0.4 }}
+            className="flex items-center gap-3 rounded-2xl border bg-card p-3.5 shadow-sm"
+            style={{ borderLeft: `3px solid ${area.color}` }}
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sunflower/15 text-2xl">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl"
+              style={{ backgroundColor: `${area.color}20` }}>
               {area.emoji}
             </div>
-            <div className="flex-1">
-              <p className="font-body font-semibold text-foreground">{area.label}</p>
-              <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div className="flex-1 min-w-0">
+              <p className="font-body text-sm font-semibold text-foreground">{area.label}</p>
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <motion.div
-                  className="h-full rounded-full bg-sunflower"
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: area.color }}
                   initial={{ width: 0 }}
                   animate={{ width: `${((scores[area.key] ?? 0) / 10) * 100}%` }}
-                  transition={{ delay: i * 0.1 + 0.3, duration: 0.6, ease: 'easeOut' }}
+                  transition={{ delay: i * 0.1 + 0.6, duration: 0.6, ease: 'easeOut' }}
                 />
               </div>
             </div>
-            <span className="font-display text-xl font-bold text-sunflower-dark">
+            <span className="font-display text-lg font-bold" style={{ color: area.color }}>
               {scores[area.key]}/10
             </span>
           </motion.div>
         ))}
-      </div>
-
-      <div className="mb-5 rounded-2xl bg-muted/50 p-4">
-        <p className="mb-3 font-body text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Todas as áreas
-        </p>
-        <div className="space-y-2">
-          {LIFE_AREAS.map(area => (
-            <div key={area.key} className="flex items-center gap-2">
-              <span className="w-4 text-sm">{area.emoji}</span>
-              <span className="w-32 font-body text-xs text-muted-foreground">{area.label}</span>
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-sunflower/60"
-                  style={{ width: `${((scores[area.key] ?? 0) / 10) * 100}%` }}
-                />
-              </div>
-              <span className="w-6 text-right font-body text-xs font-medium text-foreground">
-                {scores[area.key]}
-              </span>
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="flex gap-3">

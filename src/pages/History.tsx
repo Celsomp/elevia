@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLifeAreas, computeStreak } from '@/hooks/useDashboardData'
 import { LIFE_AREAS, type LifeAreaKey } from '@/lib/lifeAreas'
+import { LifeWheelChart } from '@/components/radar/LifeWheelChart'
 
 // ── Data hooks ────────────────────────────────────────────────────────
 
@@ -230,11 +231,25 @@ export default function History() {
           <h2 className="font-display text-base font-semibold text-foreground mb-3">
             Roda da Vida
           </h2>
+          {/* Radar chart */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="mb-4 rounded-2xl border border-border bg-card p-4"
+          >
+            <LifeWheelChart
+              scores={scores}
+              animated
+              className="w-full max-w-[240px] mx-auto"
+            />
+          </motion.div>
+          {/* Score bars */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="rounded-2xl border border-border bg-card p-4 space-y-3.5"
+            transition={{ delay: 0.3 }}
+            className="rounded-2xl border border-border bg-card p-4 space-y-3"
           >
             {sortedAreas.map((area, i) => {
               const score = scores[area.key] ?? 0
@@ -244,7 +259,7 @@ export default function History() {
                     <span className="font-body text-sm text-foreground">
                       {area.emoji} {area.label}
                     </span>
-                    <span className="font-body text-xs font-semibold text-muted-foreground">
+                    <span className="font-body text-xs font-semibold" style={{ color: area.color }}>
                       {score}/10
                     </span>
                   </div>
@@ -254,7 +269,7 @@ export default function History() {
                       style={{ backgroundColor: area.color }}
                       initial={{ width: 0 }}
                       animate={{ width: `${score * 10}%` }}
-                      transition={{ delay: 0.25 + i * 0.05, duration: 0.55, ease: 'easeOut' }}
+                      transition={{ delay: 0.3 + i * 0.05, duration: 0.55, ease: 'easeOut' }}
                     />
                   </div>
                 </div>

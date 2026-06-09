@@ -15,7 +15,6 @@ export function getSunflowerHealth(health: number): SunflowerHealth {
   if (health <= 40) return 'young'
   if (health <= 60) return 'growing'
   if (health <= 75) return 'blooming'
-  if (health <= 100) return 'full'
   return 'full'
 }
 
@@ -29,14 +28,25 @@ const STATE_LABELS: Record<SunflowerHealth, string> = {
   wilting:  'A murchar',
 }
 
+// Per-state petal geometry (as fractions of `size`)
+type PetalConfig = { count: number; ry: number; rx: number; dist: number }
+const PETAL: Record<SunflowerHealth, PetalConfig> = {
+  seed:     { count: 0,  ry: 0,     rx: 0,     dist: 0     },
+  sprout:   { count: 0,  ry: 0,     rx: 0,     dist: 0     },
+  young:    { count: 8,  ry: 0.095, rx: 0.036, dist: 0.082 },
+  growing:  { count: 10, ry: 0.130, rx: 0.046, dist: 0.112 },
+  blooming: { count: 12, ry: 0.155, rx: 0.052, dist: 0.132 },
+  full:     { count: 14, ry: 0.175, rx: 0.058, dist: 0.148 },
+  wilting:  { count: 9,  ry: 0.155, rx: 0.050, dist: 0.132 },
+}
+
 export function Sunflower({ health, className, size = 220 }: SunflowerProps) {
   const state = getSunflowerHealth(health)
   const isWilting = state === 'wilting'
+  const petal = PETAL[state]
 
-  // Visual parameters per state
-  const stemHeight   = { seed: 0,    sprout: 0.2, young: 0.45, growing: 0.65, blooming: 0.82, full: 1.0,  wilting: 1.0  }[state]
-  const petalCount   = { seed: 0,    sprout: 0,   young: 4,    growing: 8,    blooming: 10,   full: 13,   wilting: 8    }[state]
-  const centerScale  = { seed: 0.15, sprout: 0.2, young: 0.35, growing: 0.5,  blooming: 0.65, full: 0.8,  wilting: 0.7  }[state]
+  const stemHeight   = { seed: 0,    sprout: 0.22, young: 0.48, growing: 0.66, blooming: 0.83, full: 1.0,  wilting: 1.0  }[state]
+  const centerScale  = { seed: 0.15, sprout: 0.2,  young: 0.32, growing: 0.50, blooming: 0.64, full: 0.80, wilting: 0.70 }[state]
   const stemDroop    = isWilting ? -18 : 0
   const saturation   = isWilting ? 0.3 : 1
 
@@ -47,6 +57,10 @@ export function Sunflower({ health, className, size = 220 }: SunflowerProps) {
   const stemY2 = svgH * 0.96
   const stemY1 = stemY2 - stemMaxH * stemHeight
   const flowerY = stemY1
+
+  const pr   = size * petal.ry
+  const pd   = size * petal.dist
+  const prx  = size * petal.rx
 
   return (
     <div className={cn('flex flex-col items-center gap-2', className)}>
@@ -68,8 +82,8 @@ export function Sunflower({ health, className, size = 220 }: SunflowerProps) {
           transition={{ duration: 0.8, ease: 'easeOut' }}
         />
 
-        {/* Leaves (only from 'young' onwards) */}
-        {stemHeight >= 0.45 && (
+        {/* Leaves */}
+        {stemHeight >= 0.48 && (
           <>
             <motion.ellipse
               cx={cx - size * 0.12} cy={stemY2 - stemMaxH * 0.3}
@@ -80,7 +94,7 @@ export function Sunflower({ health, className, size = 220 }: SunflowerProps) {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             />
-            {stemHeight >= 0.65 && (
+            {stemHeight >= 0.66 && (
               <motion.ellipse
                 cx={cx + size * 0.12} cy={stemY2 - stemMaxH * 0.5}
                 rx={size * 0.1} ry={size * 0.055}
@@ -94,30 +108,29 @@ export function Sunflower({ health, className, size = 220 }: SunflowerProps) {
           </>
         )}
 
-        {/* Flower head group */}
-        {petalCount > 0 && (
+        {/* Flower head */}
+        {petal.count > 0 && (
           <motion.g
             style={{ originX: `${cx}px`, originY: `${flowerY}px` }}
             animate={{ rotate: stemDroop }}
             transition={{ type: 'spring', damping: 12 }}
           >
             {/* Petals */}
-            {Array.from({ length: petalCount }, (_, i) => {
-              const angle = (i / petalCount) * 360
-              const pr = size * 0.175
-              const pd = size * 0.145
+            {Array.from({ length: petal.count }, (_, i) => {
+              const deg = (i / petal.count) * 360
+              const rad = (deg * Math.PI) / 180
               return (
                 <motion.ellipse
                   key={i}
-                  cx={cx + Math.sin((angle * Math.PI) / 180) * pd}
-                  cy={flowerY - Math.cos((angle * Math.PI) / 180) * pd}
-                  rx={size * 0.055}
+                  cx={cx + Math.sin(rad) * pd}
+                  cy={flowerY - Math.cos(rad) * pd}
+                  rx={prx}
                   ry={pr}
-                  fill={`hsl(43 ${Math.round(80 * saturation)}% ${isWilting ? 50 : 58}%)`}
-                  transform={`rotate(${angle}, ${cx + Math.sin((angle * Math.PI) / 180) * pd}, ${flowerY - Math.cos((angle * Math.PI) / 180) * pd})`}
+                  fill={`hsl(43 ${Math.round(82 * saturation)}% ${isWilting ? 48 : 56}%)`}
+                  transform={`rotate(${deg}, ${cx + Math.sin(rad) * pd}, ${flowerY - Math.cos(rad) * pd})`}
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1 + i * 0.04, duration: 0.35, ease: 'backOut' }}
+                  transition={{ delay: 0.08 + i * 0.035, duration: 0.35, ease: 'backOut' }}
                 />
               )
             })}
@@ -126,10 +139,10 @@ export function Sunflower({ health, className, size = 220 }: SunflowerProps) {
             <motion.circle
               cx={cx} cy={flowerY}
               r={size * centerScale * 0.18}
-              fill={`hsl(25 ${Math.round(60 * saturation)}% 30%)`}
+              fill={`hsl(25 ${Math.round(62 * saturation)}% 30%)`}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: 'spring', damping: 10 }}
+              transition={{ delay: 0.15, type: 'spring', damping: 10 }}
             />
             {/* Centre highlight */}
             <motion.circle
@@ -138,12 +151,12 @@ export function Sunflower({ health, className, size = 220 }: SunflowerProps) {
               fill="hsla(0 0% 100% / 0.18)"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.35 }}
             />
           </motion.g>
         )}
 
-        {/* Seed state */}
+        {/* Seed */}
         {state === 'seed' && (
           <motion.ellipse
             cx={cx} cy={stemY2 - size * 0.04}
@@ -156,7 +169,6 @@ export function Sunflower({ health, className, size = 220 }: SunflowerProps) {
         )}
       </motion.svg>
 
-      {/* State label */}
       <p className="font-body text-xs font-medium text-muted-foreground">{STATE_LABELS[state]}</p>
     </div>
   )

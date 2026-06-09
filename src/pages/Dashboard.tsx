@@ -85,21 +85,24 @@ export default function Dashboard() {
           />
         )}
       </AnimatePresence>
-      {/* Header */}
-      <header className="px-5 pt-10 pb-2">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="font-body text-sm text-muted-foreground">{todayCapitalized}</p>
-            <h1 className="font-display text-2xl font-bold text-foreground">
-              Olá, {firstName} 👋
-            </h1>
-          </div>
-          <PushBell />
-        </div>
-      </header>
 
-      {/* Sunflower + Streak */}
-      <section className="flex flex-col items-center py-4">
+      {/* Warm gradient hero area */}
+      <div className="bg-gradient-to-b from-sunflower/10 via-sunflower/5 to-transparent">
+        {/* Header */}
+        <header className="px-5 pt-10 pb-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="font-body text-sm text-muted-foreground">{todayCapitalized}</p>
+              <h1 className="font-display text-2xl font-bold text-foreground">
+                Olá, {firstName} 👋
+              </h1>
+            </div>
+            <PushBell />
+          </div>
+        </header>
+
+        {/* Sunflower + Streak */}
+        <section className="flex flex-col items-center py-4">
         <motion.div
           initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -137,6 +140,7 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+      </div>{/* end gradient hero */}
 
       {/* Missions */}
       <section className="flex-1 px-5 pb-8">
@@ -174,8 +178,9 @@ export default function Dashboard() {
                   disabled={done}
                   className={cn(
                     'w-full rounded-2xl border bg-card p-4 text-left shadow-sm transition-all active:scale-[0.98]',
-                    done ? 'opacity-60' : 'hover:border-sunflower/40 hover:shadow-md cursor-pointer'
+                    done ? 'opacity-60' : 'hover:shadow-md cursor-pointer'
                   )}
+                  style={{ borderLeft: area ? `3px solid ${area.color}` : undefined }}
                 >
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 shrink-0">
