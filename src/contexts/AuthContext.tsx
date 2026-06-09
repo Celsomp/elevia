@@ -9,6 +9,7 @@ interface Profile {
   avatar_url: string | null
   plan: 'free' | 'premium'
   onboarding_complete: boolean
+  solar_energy: number
 }
 
 interface AuthContextValue {
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('id', userId)
       .single()
-    setProfile(data)
+    setProfile(data ? { ...data, solar_energy: data.solar_energy ?? 0 } : null)
     setLoading(false)
   }
 

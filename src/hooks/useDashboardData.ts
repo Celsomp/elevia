@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { LIFE_AREAS, type LifeAreaKey, type ScoresMap } from '@/lib/lifeAreas'
+import { ENERGY_REWARDS } from '@/lib/solarEnergy'
 
 interface WeakArea { key: LifeAreaKey; label: string; score: number }
 interface GenerateParams { scores: ScoresMap; streak: number; name: string }
@@ -56,25 +57,9 @@ export function computeStreak(sessions: { completed_at: string }[]): number {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     if (days.has(d.toISOString().slice(0, 10))) streak++
-    else if (i > 0) break  // gap found; stop (allow today to be empty)
+    else if (i > 0) break
   }
   return streak
-}
-
-/** 0-100 sunflower health score */
-export function computeSunflowerHealth(params: {
-  streak: number
-  sessionsLast7: number
-  todayMissionsTotal: number
-  todayMissionsDone: number
-}): number {
-  const { streak, sessionsLast7, todayMissionsTotal, todayMissionsDone } = params
-  const streakScore    = Math.min(streak * 5, 30)               // max 30
-  const sessionScore   = Math.min(sessionsLast7 * 10, 40)       // max 40
-  const missionScore   = todayMissionsTotal > 0
-    ? Math.round((todayMissionsDone / todayMissionsTotal) * 30) // max 30
-    : 0
-  return Math.min(streakScore + sessionScore + missionScore, 100)
 }
 
 // ─── MISSIONS ─────────────────────────────────────────────────────
@@ -99,7 +84,7 @@ export function useTodayMissions() {
 
 export function useCompleteMission() {
   const qc = useQueryClient()
-  const { user } = useAuth()
+  const { user, refreshProfile } = useAuth()
   const today = new Date().toISOString().slice(0, 10)
 
   return useMutation({
@@ -109,8 +94,13 @@ export function useCompleteMission() {
         .update({ completed_at: new Date().toISOString() })
         .eq('id', missionId)
       if (error) throw error
+      // Award solar energy (+10 ☀️ per mission)
+      await supabase.rpc('add_solar_energy', { p_amount: ENERGY_REWARDS.mission })
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['missions', user?.id, today] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['missions', user?.id, today] })
+      refreshProfile()
+    },
   })
 }
 
@@ -130,7 +120,6 @@ export function useGenerateMissions() {
       let selected: { title: string; area: LifeAreaKey }[] = []
       let source: 'helia' | 'static' = 'static'
 
-      // Try AI generation via Helia
       if (session) {
         try {
           const res = await fetch(
@@ -154,7 +143,6 @@ export function useGenerateMissions() {
         } catch { /* fallback below */ }
       }
 
-      // Fallback to static pool if AI unavailable or returned too few
       if (selected.length < 2) {
         selected = generateStaticMissions(weakest)
         source = 'static'
@@ -191,7 +179,6 @@ function generateStaticMissions(weakAreas: WeakArea[]): { title: string; area: L
   return selected
 }
 
-// Static mission pool per area (used until Helia generates them)
 function getMissionPool(): Partial<Record<LifeAreaKey, string[]>> {
   return {
     career: [

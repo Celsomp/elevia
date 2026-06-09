@@ -50,7 +50,7 @@ export function ComebackModal({ daysSince, onDismiss }: ComebackModalProps) {
       >
         {/* Sunflower */}
         <div className="flex justify-center mb-4">
-          <Sunflower health={8} size={120} />
+          <Sunflower stage={1} size={120} />
         </div>
 
         {/* Days away */}

@@ -49,7 +49,7 @@ function playBell() {
 }
 
 export default function Focus() {
-  const { user, profile } = useAuth()
+  const { user, profile, refreshProfile } = useAuth()
   const qc = useQueryClient()
   const isPremium = profile?.plan === 'premium'
 
@@ -110,25 +110,33 @@ export default function Focus() {
     return clearTimer
   }, [timerState, mode, clearTimer])
 
-  // ── Free: save session on completion ─────────────────────────────
+  // ── Free: save session + award energy on completion ──────────────
   useEffect(() => {
     if (mode !== 'free' || freeState !== 'completed' || !user) return
     setSaving(true)
-    supabase
-      .from('focus_sessions')
-      .insert({ user_id: user.id, duration_minutes: freePreset })
-      .then(() => { setSaving(false); qc.invalidateQueries({ queryKey: ['focus_sessions', user.id] }) })
+    const energyReward = freePreset >= 60 ? 30 : freePreset >= 45 ? 20 : 10
+    Promise.all([
+      supabase.from('focus_sessions').insert({ user_id: user.id, duration_minutes: freePreset }),
+      supabase.rpc('add_solar_energy', { p_amount: energyReward }),
+    ]).then(() => {
+      setSaving(false)
+      qc.invalidateQueries({ queryKey: ['focus_sessions', user.id] })
+      refreshProfile()
+    })
   }, [freeState])
 
-  // ── Pomodoro: bell + save work session on completion ──────────────
+  // ── Pomodoro: bell + save work session + award energy ────────────
   useEffect(() => {
     if (mode !== 'pomodoro' || pomState !== 'completed') return
     playBell()
     if (pomPhase === 'work' && user) {
-      supabase
-        .from('focus_sessions')
-        .insert({ user_id: user.id, duration_minutes: 25 })
-        .then(() => qc.invalidateQueries({ queryKey: ['focus_sessions', user.id] }))
+      Promise.all([
+        supabase.from('focus_sessions').insert({ user_id: user.id, duration_minutes: 25 }),
+        supabase.rpc('add_solar_energy', { p_amount: 10 }),
+      ]).then(() => {
+        qc.invalidateQueries({ queryKey: ['focus_sessions', user.id] })
+        refreshProfile()
+      })
     }
   }, [pomState, pomPhase, mode])
 

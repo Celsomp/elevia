@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { ENERGY_REWARDS } from '@/lib/solarEnergy'
 
 export interface Reflection {
   id: string
@@ -62,17 +63,20 @@ export function useCanReflect(isPremium: boolean) {
 
 export function useSaveReflection() {
   const qc = useQueryClient()
-  const { user } = useAuth()
+  const { user, refreshProfile } = useAuth()
   return useMutation({
     mutationFn: async ({ prompt, content }: { prompt: string | null; content: string }) => {
       const { error } = await supabase
         .from('reflections')
         .insert({ user_id: user!.id, prompt, content })
       if (error) throw error
+      // Award solar energy (+10 ☀️ per reflection)
+      await supabase.rpc('add_solar_energy', { p_amount: ENERGY_REWARDS.reflection })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['reflections', user?.id] })
       qc.invalidateQueries({ queryKey: ['reflections_week', user?.id] })
+      refreshProfile()
     },
   })
 }
